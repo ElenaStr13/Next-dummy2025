@@ -7,13 +7,13 @@ import {useEffect, useState} from "react";
 
 const Menu = () => {
     const { user, logout, loading } = useAuth();
-   // const [localUser, setLocalUser] = useState(user);
+   const [localUser, setLocalUser] = useState(user);
 
-    // useEffect(() => {
-    //     if (user) {
-    //         setLocalUser(user);
-    //     }
-    // }, [user]);
+    useEffect(() => {
+        if (user) {
+            setLocalUser(user);
+        }
+    }, [user]);
     if (loading) {
         return <p>Завантаження...</p>;
     }

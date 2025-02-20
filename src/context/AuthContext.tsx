@@ -27,27 +27,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const fetchUser = async () => {
             try {
                 const token = getCookie("accessToken");
-                //console.log("Перевірка токена:", token);
 
                 if (!token) {
                     console.warn("Токен не знайдено. Користувач не авторизований.");
                     return;
                 }
 
-                const userRes = await fetch("https://dummyjson.com/auth/me", {
+                let userRes = await fetch("https://dummyjson.com/auth/me", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
                 if (userRes.status === 401) {
                     console.warn("Токен недійсний, пробуємо оновити...");
                     await refreshAccessToken();
-                } else {
+                    const newToken = getCookie("accessToken");
+
+                if (newToken) {
+                        userRes = await fetch("https://dummyjson.com/auth/me", {
+                            headers: { Authorization: `Bearer ${newToken}` },
+                        });
+                    }
+                }
+
+                if (userRes.ok) {
                     const userData = await userRes.json();
-                   //console.log("Отримано користувача:", userData);
                     setUser(userData);
+                } else {
+                    console.error("Неможливо отримати користувача.");
                 }
             } catch (error) {
-                console.error("Помилка авторизації:", error);
+                console.error(error);
             }finally {
                 setLoading(false);
             }
@@ -66,7 +75,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             });
 
             const data = await res.json();
-            console.log("Відповідь API при логіні:", data);
 
             if (!data.accessToken || !data.refreshToken) {
                 throw new Error("API не повернуло токени. Логін не вдався.");
@@ -79,10 +87,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const userRes = await fetch(`https://dummyjson.com/users/${data.id}`);
             const userData = await userRes.json();
             setUser(userData);
-            console.log("Користувач встановлений після логіна:", userData);
 
             // Перенаправлення
-            //router.refresh();
+            router.refresh();
             router.push("/");
         } catch (error: any) {
             console.error("Помилка логіна:", error.message);
@@ -96,7 +103,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const refreshAccessToken = async () => {
         try {
             const refreshToken = getCookie("refreshToken");
-            //console.log("Refresh Token перед оновленням:", refreshToken);
 
             if (!refreshToken) {
                 throw new Error("Refresh Token відсутній.");

@@ -17,13 +17,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+      <html lang="en">
       <body>
       <AuthProvider>
           <Menu />
         {children}
       </AuthProvider>
       </body>
-    </html>
+      </html>
   );
 }
